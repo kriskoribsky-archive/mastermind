@@ -1,18 +1,18 @@
 #include <Arduino.h>
+#include <stdlib.h>
 
-// put function declarations here:
-int myFunction(int, int);
+#include "init.h"
+#include "mastermind.h"
+#include "lcd.h"
 
-void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
-}
+int main(void)
+{
+    arduino_init();
+    circuit_init();
+    lcd_init();
 
-void loop() {
-  // put your main code here, to run repeatedly:
-}
+    run_diagnostics();
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+
+    return EXIT_SUCCESS;
 }
