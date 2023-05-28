@@ -4,7 +4,7 @@
 
 #include "lcd.h"
 
-LCDi2c lcd(LCD_ADDR);
+static LCDi2c lcd(LCD_ADDR); // restrict scope just for this file
 
 void lcd_init()
 {
@@ -35,11 +35,12 @@ void lcd_print_at(int y, int x, char *text)
 void lcd_printf_at(int y, int x, const char *format, ...)
 {
     va_list args;
+    char buffer[LCD_COLS + 1];
 
     va_start(args, format);
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
 
     lcd_set_cursor(y, x);
-    lcd.printf(format, args);
-
-    va_end(args);
+    lcd_print(buffer);
 }
