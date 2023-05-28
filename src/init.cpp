@@ -4,6 +4,7 @@
 
 #include "mastermind.h"
 #include "lcd.h"
+#include "debounce.h"
 
 #define READ_DELAY 200
 
@@ -89,10 +90,8 @@ void run_diagnostics(void)
 
 void wait_for_high(byte pin)
 {
-    while (digitalRead(pin) != HIGH)
-    {
-        delay(READ_DELAY);
-    }
+    while (debounce_read(pin) != HIGH)
+        ;
 }
 
 void leds_red(byte state)

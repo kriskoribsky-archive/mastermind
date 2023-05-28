@@ -117,6 +117,7 @@ void play_game(char *secret)
     lcd_print_at(0, 0, "Welcome to the");
     lcd_print_at(1, 0, "game Mastermind!");
     delay(TEXT_DELAY);
+    lcd_clear();
     lcd_print_at(0, 0, "Guess my code!");
 
     // allocate history
@@ -136,17 +137,17 @@ void play_game(char *secret)
 
     while (peg_a + peg_b < SECRET_LENGTH && current_guess < MAX_GUESSES)
     {
+        delay(TICK_RATE);
+
         // iterate in history backwards
         if (digitalRead(BTN_1_PIN) == HIGH && digitalRead(BTN_2_PIN) == HIGH && current_guess > 0)
         {
             current_history = max(0, current_history - 1);
-            render_history(secret, history, current_history);
         }
         // iterate in history forwards
         else if (digitalRead(BTN_1_PIN) == HIGH && digitalRead(BTN_3_PIN) == HIGH && current_guess > 0)
         {
             current_history = min(current_guess - 1, current_history + 1);
-            render_history(secret, history, current_history);
         }
         else if (digitalRead(BTN_1_PIN) == HIGH)
         {
@@ -167,12 +168,19 @@ void play_game(char *secret)
         else if (digitalRead(BTN_ENTER_PIN) == HIGH)
         {
             current_history = current_guess;
-            render_history(secret, history, current_history);
 
             get_score(secret, history[current_guess], &peg_a, &peg_b);
             current_guess++;
         }
-        delay(TICK_RATE);
+        else
+        {
+            continue;
+        }
+
+        // update changes
+        lcd_clear();
+        render_history(secret, history, current_history);
+        lcd_printf_at(1, 0, "Your guess: %s", history[current_guess]);
     }
 
     // result

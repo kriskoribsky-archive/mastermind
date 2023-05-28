@@ -21,7 +21,7 @@
 #define SECRET_LENGTH 4
 #define MAX_GUESSES 10
 
-#define TICK_RATE 200   // milisecond intervals of reading inputs
+#define TICK_RATE 20    // milisecond intervals of processing I/O
 #define TEXT_DELAY 3000 // delay between text messages on LCD screen
 
 
