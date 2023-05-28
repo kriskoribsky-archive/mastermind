@@ -13,14 +13,14 @@ int main(void)
     circuit_init();
     lcd_init();
 
-    run_diagnostics();
+    // run_diagnostics();
 
-    // for (;;)
-    // {
-    //     char *code = generate_code(false, SECRET_LENGTH);
-    //     play_game(code);
-    //     free(code);
-    // }
+    for (;;)
+    {
+        char *code = generate_code(false, SECRET_LENGTH);
+        play_game(code);
+        free(code);
+    }
 
     return EXIT_SUCCESS;
 }

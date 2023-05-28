@@ -26,12 +26,15 @@ char *generate_code(bool repeat, int length)
         char value;
         do
         {
-            value = random(0, 9);
+            value = '0' + random(0, 9);
 
         } while (repeat == false && strchr(code, value) != NULL);
 
         code[i] = value;
     }
+
+    Serial.println("Generated secret is:");
+    Serial.println(code);
 
     return code;
 }
@@ -143,25 +146,39 @@ void play_game(char *secret)
     int current_guess = 0;
     int current_history = -1;
 
-    do
-    {
-        // update
-        lcd_clear();
-        render_history(secret, history, current_history);
-        lcd_printf_at(1, 0, "Your guess: %s", history[current_guess]);
+    // render
+    lcd_clear();
+    render_history(secret, history, current_history);
+    lcd_printf_at(1, 0, "Your guess: %s", history[current_guess]);
 
-        // process inputs
-        if (digitalRead(BTN_1_PIN) == HIGH && digitalRead(BTN_2_PIN) == HIGH && current_guess > 0)
+    while (peg_a < SECRET_LENGTH && current_guess < MAX_GUESSES)
+    {
+        // process
+        if (digitalRead(BTN_1_PIN) == HIGH)
         {
-            current_history = max(0, current_history - 1); // iterate in history backwards
-        }
-        else if (digitalRead(BTN_1_PIN) == HIGH && digitalRead(BTN_3_PIN) == HIGH && current_guess > 0)
-        {
-            current_history = min(current_guess - 1, current_history + 1);
-        }
-        else if (digitalRead(BTN_1_PIN) == HIGH) // iterate in history forwards
-        {
-            history[current_guess][0] = '0' + (history[current_guess][0] - '0' + 1) % 10;
+            bool history_changed = false;
+
+            while (digitalRead(BTN_1_PIN) == HIGH)
+            {
+                if (digitalRead(BTN_2_PIN) == HIGH && current_guess > 0)
+                {
+                    current_history = max(0, current_history - 1); // iterate in history backwards
+                    history_changed = true;
+                    render_history(secret, history, current_history);
+                    delay(READ_DELAY);
+                }
+                else if (digitalRead(BTN_3_PIN) == HIGH && current_guess > 0)
+                {
+                    current_history = min(current_guess - 1, current_history + 1);
+                    history_changed = true;
+                    render_history(secret, history, current_history);
+                    delay(READ_DELAY);
+                }
+            }
+            if (!history_changed)
+            {
+                history[current_guess][0] = '0' + (history[current_guess][0] - '0' + 1) % 10;
+            }
         }
         else if (digitalRead(BTN_2_PIN) == HIGH)
         {
@@ -184,17 +201,25 @@ void play_game(char *secret)
         }
         else
         {
+            delay(TICK_RATE);
             continue;
         }
 
-        // delay
-        delay(TICK_RATE);
+        // render
+        lcd_clear();
+        render_history(secret, history, current_history);
+        lcd_printf_at(1, 0, "Your guess: %s", history[current_guess]);
 
-    } while (peg_a + peg_b < SECRET_LENGTH && current_guess < MAX_GUESSES);
+        // delay
+        delay(READ_DELAY);
+    }
 
     // result
     lcd_clear();
-    lcd_print_at(0, 0, (char *)(current_guess < MAX_GUESSES ? "You won !" : "You lost!"));
+    lcd_print_at(0, 0, (char *)(current_guess < MAX_GUESSES ? "You won!" : "You lost!"));
+    delay(5000);
+    lcd_clear();
+    turn_off_leds();
 
     for (int i = 0; i < MAX_GUESSES; i++)
     {

@@ -4,9 +4,6 @@
 
 #include "mastermind.h"
 #include "lcd.h"
-#include "debounce.h"
-
-#define READ_DELAY 200
 
 void wait_for_high(byte pin);
 void leds_red(byte state);
@@ -25,8 +22,14 @@ void arduino_init(void)
 
 void circuit_init(void)
 {
-    Serial.begin(9600);
+    // if analog input pin 1 is unconnected, random analog
+    // noise will cause the call to randomSeed() to generate
+    // different seed numbers each time the sketch runs.
+    // randomSeed() will then shuffle the random function.
+    randomSeed(analogRead(1));
 
+    Serial.begin(9600);
+    
     pinMode(LED_BLUE_1, OUTPUT);
     pinMode(LED_RED_1, OUTPUT);
     pinMode(LED_BLUE_2, OUTPUT);
@@ -90,8 +93,9 @@ void run_diagnostics(void)
 
 void wait_for_high(byte pin)
 {
-    while (debounce_read(pin) != HIGH)
+    while (digitalRead(pin) != HIGH)
         ;
+    delay(READ_DELAY);
 }
 
 void leds_red(byte state)
