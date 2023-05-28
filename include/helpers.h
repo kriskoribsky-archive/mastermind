@@ -44,16 +44,16 @@
         }                 \
     }
 
-#define MALLOC(nmemb, ptr)                                          \
-    {                                                               \
-        (ptr) = (decltype(ptr)) malloc((nmemb) * (sizeof(*(ptr)))); \
-        assert((ptr) != NULL);                                      \
+#define MALLOC(nmemb, ptr)                          \
+    {                                               \
+        (ptr) = malloc((nmemb) * (sizeof(*(ptr)))); \
+        assert((ptr) != NULL);                      \
     }
 
-#define CALLOC(nmemb, ptr)                                          \
-    {                                                               \
-        (ptr) = (decltype(ptr)) calloc((nmemb), (sizeof(*(ptr))));  \
-        assert((ptr) != NULL);                                      \
+#define CALLOC(nmemb, ptr)                         \
+    {                                              \
+        (ptr) = calloc((nmemb), (sizeof(*(ptr)))); \
+        assert((ptr) != NULL);                     \
     }
 
 #define FREE(ptr)     \

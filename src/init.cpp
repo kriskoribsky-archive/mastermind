@@ -24,6 +24,8 @@ void arduino_init(void)
 
 void circuit_init(void)
 {
+    Serial.begin(9600);
+
     pinMode(LED_BLUE_1, OUTPUT);
     pinMode(LED_RED_1, OUTPUT);
     pinMode(LED_BLUE_2, OUTPUT);
@@ -72,7 +74,7 @@ void run_diagnostics(void)
     wait_for_high(BTN_ENTER_PIN);
     leds_blue(LOW);
 
-    lcd_print_at(1, 0, "Are LEDs red?");
+    lcd_print_at(1, 0, "Are LEDs red? ");
     leds_red(HIGH);
     wait_for_high(BTN_ENTER_PIN);
     leds_red(LOW);

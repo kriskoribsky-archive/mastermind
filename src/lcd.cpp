@@ -1,5 +1,6 @@
 #include <Arduino.h>
-#include <LCDi2c.h>
+#include <LCDi2c.h> // https://registry.platformio.org/libraries/sstaub/LCD%20I2C
+#include <stdarg.h>
 
 #include "lcd.h"
 
@@ -29,4 +30,16 @@ void lcd_print_at(int y, int x, char *text)
 {
     lcd_set_cursor(y, x);
     lcd_print(text);
+}
+
+void lcd_printf_at(int y, int x, const char *format, ...)
+{
+    va_list args;
+
+    va_start(args, format);
+
+    lcd_set_cursor(y, x);
+    lcd.printf(format, args);
+
+    va_end(args);
 }

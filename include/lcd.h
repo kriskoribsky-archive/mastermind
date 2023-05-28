@@ -54,4 +54,19 @@ void lcd_print(char* text);
  */
 void lcd_print_at(int y, int x, char* text);
 
+
+/**
+ * Set cursor to the given position and print formatted text
+ * 
+ * Sets the cursor to the specified position based on the y and x coordinates, and prints
+ * formatted text on the LCD display. The formatted text can include placeholders for
+ * variables that will be replaced with their corresponding values.
+ * @param y the row
+ * @param x the column
+ * @param format the format string containing placeholders for variables
+ * @param ... additional arguments to be formatted and printed
+ */
+void lcd_printf_at(int y, int x, const char *format, ...);
+
+
 #endif

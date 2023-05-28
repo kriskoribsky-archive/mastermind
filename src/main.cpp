@@ -2,8 +2,10 @@
 #include <stdlib.h>
 
 #include "init.h"
-#include "mastermind.h"
 #include "lcd.h"
+#include "mastermind.h"
+
+// TODO implement unit tests
 
 int main(void)
 {

@@ -21,7 +21,9 @@
 #define SECRET_LENGTH 4
 #define MAX_GUESSES 10
 
+#define TICK_RATE 200   // milisecond intervals of reading inputs
 #define TEXT_DELAY 3000 // delay between text messages on LCD screen
+
 
 /**
  * Generate secret code

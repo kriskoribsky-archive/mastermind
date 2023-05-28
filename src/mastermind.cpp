@@ -7,10 +7,7 @@
 
 #include "mastermind.h"
 
-#include "helpers.h"
 #include "lcd.h"
-
-#define LCD_BUFFER_SIZE LCD_COLS + 1
 
 char *generate_code(bool repeat, int length)
 {
@@ -21,39 +18,38 @@ char *generate_code(bool repeat, int length)
         return NULL;
     }
 
-    char *code;
-    CALLOC(length + 1, code);
+    char *code = (char *)calloc(length + 1, sizeof(char));
+    assert(code != NULL);
 
     for (int i = 0; i < length; i++)
     {
         char value;
         do
         {
-            value = random(0, 9) + '0';
+            value = random(0, 9);
 
         } while (repeat == false && strchr(code, value) != NULL);
 
         code[i] = value;
     }
 
-    code[length] = '\0';
     return code;
 }
 
-void get_score(const char *secret, const char *guess, int *peg_a, int *peg_b)
+void get_score(const char *secret, const char *current_guess, int *peg_a, int *peg_b)
 {
     size_t length = strlen(secret);
-    assert(length == strlen(guess));
+    assert(length == strlen(current_guess));
 
     *peg_a = *peg_b = 0;
 
     for (size_t i = 0; i < length; i++)
     {
-        if (secret[i] == guess[i])
+        if (secret[i] == current_guess[i])
         {
             (*peg_a)++;
         }
-        else if (strchr(secret, guess[i]) != NULL)
+        else if (strchr(secret, current_guess[i]) != NULL)
         {
             (*peg_b)++;
         }
@@ -101,10 +97,8 @@ void render_history(char *secret, char **history, const int entry_nr)
 {
     assert(secret != NULL);
     assert(history != NULL);
-    CHECK_NULL_VOID(secret);
-    CHECK_NULL_VOID(history);
-
-    assert(entry_nr >= 0 && entry_nr <= SECRET_LENGTH);
+    assert(history[entry_nr] != NULL);
+    assert(entry_nr >= 0 && entry_nr < MAX_GUESSES);
 
     // evaluate
     int peg_a, peg_b;
@@ -112,77 +106,82 @@ void render_history(char *secret, char **history, const int entry_nr)
 
     // render
     render_leds((const int)peg_a, (const int)peg_b);
-
-    char buffer[LCD_BUFFER_SIZE];
-    snprintf(buffer, LCD_BUFFER_SIZE, "%02d: %s %dA%dB", entry_nr + 1, history[entry_nr], peg_a, peg_b);
-    lcd_print_at(0, 0, buffer);
+    lcd_printf_at(0, 0, "%02d: %s %dA%dB", entry_nr + 1, peg_a, peg_b);
 }
 
 void play_game(char *secret)
 {
-    ASSERT(secret != NULL);
-    CHECK_NULL_VOID(secret);
+    assert(secret != NULL);
 
     // intro
-    lcd_print_at(0, 0, "Welcome to the Game Mastermind");
+    lcd_print_at(0, 0, "Welcome to the");
     lcd_print_at(1, 0, "game Mastermind!");
     delay(TEXT_DELAY);
-    lcd_print_at(0, 0, "Guess my code:");
+    lcd_print_at(0, 0, "Guess my code!");
 
-    int peg_a = 0;
-    int peg_b = 0;
-    int guess = 0;
-    int entry_nr = 0;
+    // allocate history
+    char **history = (char **)malloc(MAX_GUESSES * sizeof(char *));
+    assert(history != NULL);
 
-    char *history[MAX_GUESSES];
-
-    while (peg_a + peg_b < SECRET_LENGTH && guess < MAX_GUESSES)
+    for (int i = 0; i < MAX_GUESSES; i++)
     {
-        // inputs
-        if (digitalRead(BTN_1_PIN) == HIGH && digitalRead(BTN_2_PIN) == HIGH)
+        history[i] = (char *)calloc(SECRET_LENGTH + 1, sizeof(char));
+        assert(history[i] != NULL);
+        memset(history[i], '0', SECRET_LENGTH);
+    }
+
+    int peg_a = 0, peg_b = 0;
+    int current_guess = 0;
+    int current_history = 1;
+
+    while (peg_a + peg_b < SECRET_LENGTH && current_guess < MAX_GUESSES)
+    {
+        // iterate in history backwards
+        if (digitalRead(BTN_1_PIN) == HIGH && digitalRead(BTN_2_PIN) == HIGH && current_guess > 0)
         {
-            entry_nr = max(0, entry_nr - 1);
+            current_history = max(0, current_history - 1);
+            render_history(secret, history, current_history);
         }
-        else if (digitalRead(BTN_1_PIN) == HIGH && digitalRead(BTN_3_PIN) == HIGH)
+        // iterate in history forwards
+        else if (digitalRead(BTN_1_PIN) == HIGH && digitalRead(BTN_3_PIN) == HIGH && current_guess > 0)
         {
-            entry_nr = min(SECRET_LENGTH, entry_nr + 1);
+            current_history = min(current_guess - 1, current_history + 1);
+            render_history(secret, history, current_history);
         }
         else if (digitalRead(BTN_1_PIN) == HIGH)
         {
-            history[guess][0] = '0' + (history[guess][0] - '0' + 1) % 10;
+            history[current_guess][0] = '0' + (history[current_guess][0] - '0' + 1) % 10;
         }
         else if (digitalRead(BTN_2_PIN) == HIGH)
         {
-            history[guess][1] = '0' + (history[guess][1] - '0' + 1) % 10;
+            history[current_guess][1] = '0' + (history[current_guess][1] - '0' + 1) % 10;
         }
         else if (digitalRead(BTN_3_PIN) == HIGH)
         {
-            history[guess][2] = '0' + (history[guess][2] - '0' + 1) % 10;
+            history[current_guess][2] = '0' + (history[current_guess][2] - '0' + 1) % 10;
         }
         else if (digitalRead(BTN_4_PIN) == HIGH)
         {
-            history[guess][3] = '0' + (history[guess][3] - '0' + 1) % 10;
+            history[current_guess][3] = '0' + (history[current_guess][3] - '0' + 1) % 10;
         }
         else if (digitalRead(BTN_ENTER_PIN) == HIGH)
         {
-            get_score(secret, history[guess], &peg_a, &peg_b);
-            guess++;
-            entry_nr = guess;
-        }
+            current_history = current_guess;
+            render_history(secret, history, current_history);
 
-        // render
-        render_history(secret, history, entry_nr);
+            get_score(secret, history[current_guess], &peg_a, &peg_b);
+            current_guess++;
+        }
+        delay(TICK_RATE);
     }
 
     // result
     lcd_clear();
-    char *win_msg = "You won !";
-    char *lose_msg = "You lost!";
-    lcd_print_at(0, 0, guess < MAX_GUESSES ? win_msg : lose_msg);
+    lcd_print_at(0, 0, (char *)(current_guess < MAX_GUESSES ? "You won !" : "You lost!"));
 
     for (int i = 0; i < MAX_GUESSES; i++)
     {
-        FREE(history[i]);
+        free(history[i]);
     }
-    FREE(history);
+    free(history);
 }
