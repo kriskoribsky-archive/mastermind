@@ -1,6 +1,7 @@
 #ifndef _MASTERMIND_H
 #define _MASTERMIND_H
 
+// circuit configuration
 #define BTN_1_PIN       2
 #define BTN_2_PIN       3
 #define BTN_3_PIN       4
@@ -16,6 +17,11 @@
 #define LED_BLUE_4      12
 #define LED_RED_4       13
 
+// game configuration
+#define SECRET_LENGTH 4
+#define MAX_GUESSES 10
+
+#define TEXT_DELAY 3000 // delay between text messages on LCD screen
 
 /**
  * Generate secret code
