@@ -97,6 +97,14 @@ void render_history(char *secret, char **history, const int entry_nr)
 {
     assert(secret != NULL);
     assert(history != NULL);
+
+    // no entries in history
+    if (entry_nr == -1)
+    {
+        lcd_print_at(0, 0, "Guess my code!");
+        return;
+    }
+
     assert(history[entry_nr] != NULL);
     assert(entry_nr >= 0 && entry_nr < MAX_GUESSES);
 
@@ -133,23 +141,25 @@ void play_game(char *secret)
 
     int peg_a = 0, peg_b = 0;
     int current_guess = 0;
-    int current_history = 1;
+    int current_history = -1;
 
-    while (peg_a + peg_b < SECRET_LENGTH && current_guess < MAX_GUESSES)
+    do
     {
-        delay(TICK_RATE);
+        // update
+        lcd_clear();
+        render_history(secret, history, current_history);
+        lcd_printf_at(1, 0, "Your guess: %s", history[current_guess]);
 
-        // iterate in history backwards
+        // process inputs
         if (digitalRead(BTN_1_PIN) == HIGH && digitalRead(BTN_2_PIN) == HIGH && current_guess > 0)
         {
-            current_history = max(0, current_history - 1);
+            current_history = max(0, current_history - 1); // iterate in history backwards
         }
-        // iterate in history forwards
         else if (digitalRead(BTN_1_PIN) == HIGH && digitalRead(BTN_3_PIN) == HIGH && current_guess > 0)
         {
             current_history = min(current_guess - 1, current_history + 1);
         }
-        else if (digitalRead(BTN_1_PIN) == HIGH)
+        else if (digitalRead(BTN_1_PIN) == HIGH) // iterate in history forwards
         {
             history[current_guess][0] = '0' + (history[current_guess][0] - '0' + 1) % 10;
         }
@@ -177,11 +187,10 @@ void play_game(char *secret)
             continue;
         }
 
-        // update changes
-        lcd_clear();
-        render_history(secret, history, current_history);
-        lcd_printf_at(1, 0, "Your guess: %s", history[current_guess]);
-    }
+        // delay
+        delay(TICK_RATE);
+
+    } while (peg_a + peg_b < SECRET_LENGTH && current_guess < MAX_GUESSES);
 
     // result
     lcd_clear();
