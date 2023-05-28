@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
+#include <limits.h>
 
 #include "mastermind.h"
 
@@ -13,13 +14,15 @@
 
 char *generate_code(bool repeat, int length)
 {
-    if (length < 1)
+    assert(length <= SECRET_LENGTH);
+
+    if (length < 1 || (repeat == false && length > 10))
     {
         return NULL;
     }
 
-    char *code = (char *)malloc(length * sizeof(char));
-    CHECK_NULL(code);
+    char *code;
+    CALLOC(length + 1, code);
 
     for (int i = 0; i < length; i++)
     {
@@ -33,16 +36,19 @@ char *generate_code(bool repeat, int length)
         code[i] = value;
     }
 
+    code[length] = '\0';
     return code;
 }
 
 void get_score(const char *secret, const char *guess, int *peg_a, int *peg_b)
 {
-    int len = (int)strlen(secret);
-    for (int i = 0; i < len; i++)
-    {
-        assert(guess[i] != '\0');
+    size_t length = strlen(secret);
+    assert(length == strlen(guess));
 
+    *peg_a = *peg_b = 0;
+
+    for (size_t i = 0; i < length; i++)
+    {
         if (secret[i] == guess[i])
         {
             (*peg_a)++;
@@ -72,22 +78,29 @@ void turn_off_leds()
 void render_leds(const int peg_a, const int peg_b)
 {
     assert((peg_a + peg_b) <= SECRET_LENGTH);
+    assert((peg_a + peg_b) <= NUM_DIGITAL_PINS);
 
-    for (int pin = LED_RED_1, i = 0; i < peg_a; i++, pin += 2)
+    turn_off_leds();
+
+    byte pin = LED_RED_1;
+    for (int i = 0; i < peg_a; i++)
     {
         digitalWrite(pin, HIGH);
+        pin += 2;
     }
 
-    for (int pin = LED_BLUE_1, i = 0; i < peg_b; i++, pin += 2)
+    pin -= 1;
+    for (int i = 0; i < peg_b; i++)
     {
         digitalWrite(pin, HIGH);
+        pin += 2;
     }
 }
 
 void render_history(char *secret, char **history, const int entry_nr)
 {
-    ASSERT(secret != NULL);
-    ASSERT(history != NULL);
+    assert(secret != NULL);
+    assert(history != NULL);
     CHECK_NULL_VOID(secret);
     CHECK_NULL_VOID(history);
 
@@ -98,7 +111,6 @@ void render_history(char *secret, char **history, const int entry_nr)
     get_score(secret, history[entry_nr], &peg_a, &peg_b);
 
     // render
-    turn_off_leds();
     render_leds((const int)peg_a, (const int)peg_b);
 
     char buffer[LCD_BUFFER_SIZE];
@@ -122,12 +134,7 @@ void play_game(char *secret)
     int guess = 0;
     int entry_nr = 0;
 
-    char **history = (char **)malloc(MAX_GUESSES * sizeof(char *));
-    for (int i = 0; i < MAX_GUESSES; i++)
-    {
-        history[i] = (char *)malloc((SECRET_LENGTH + 1) * sizeof(char));
-        history[i] = "0000";
-    }
+    char *history[MAX_GUESSES];
 
     while (peg_a + peg_b < SECRET_LENGTH && guess < MAX_GUESSES)
     {

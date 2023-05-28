@@ -13,12 +13,12 @@ int main(void)
 
     run_diagnostics();
 
-    // for (;;)
-    // {
-    //     char *code = generate_code(false, 4);
-    //     play_game(code);
-    //     free(code);
-    // }
+    for (;;)
+    {
+        char *code = generate_code(false, SECRET_LENGTH);
+        play_game(code);
+        free(code);
+    }
 
     return EXIT_SUCCESS;
 }

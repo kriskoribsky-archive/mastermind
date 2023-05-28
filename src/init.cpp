@@ -5,32 +5,11 @@
 #include "mastermind.h"
 #include "lcd.h"
 
-void wait_for_high(int pin);
-void leds_red(int state);
-void leds_blue(int state);
+#define READ_DELAY 200
 
-void wait_for_press(int btn)
-{
-    delay(500); // prevents multiple button presses
-    while (digitalRead(btn) != HIGH)
-        ;
-}
-
-void leds_red(int state)
-{
-    digitalWrite(LED_RED_1, state);
-    digitalWrite(LED_RED_2, state);
-    digitalWrite(LED_RED_3, state);
-    digitalWrite(LED_RED_4, state);
-}
-
-void leds_blue(int state)
-{
-    digitalWrite(LED_BLUE_1, state);
-    digitalWrite(LED_BLUE_2, state);
-    digitalWrite(LED_BLUE_3, state);
-    digitalWrite(LED_BLUE_4, state);
-}
+void wait_for_high(byte pin);
+void leds_red(byte state);
+void leds_blue(byte state);
 
 void arduino_init(void)
 {
@@ -73,29 +52,29 @@ void run_diagnostics(void)
 
     // Buttons
     lcd_print_at(1, 0, "Press enter");
-    wait_for_press(BTN_ENTER_PIN);
+    wait_for_high(BTN_ENTER_PIN);
 
     lcd_print_at(1, 0, "Press btn 1");
-    wait_for_press(BTN_1_PIN);
+    wait_for_high(BTN_1_PIN);
 
     lcd_print_at(1, 0, "Press btn 2");
-    wait_for_press(BTN_2_PIN);
+    wait_for_high(BTN_2_PIN);
 
     lcd_print_at(1, 0, "Press btn 3");
-    wait_for_press(BTN_3_PIN);
+    wait_for_high(BTN_3_PIN);
 
     lcd_print_at(1, 0, "Press btn 4");
-    wait_for_press(BTN_4_PIN);
+    wait_for_high(BTN_4_PIN);
 
     // LEDs
     lcd_print_at(1, 0, "Are LEDs blue?");
     leds_blue(HIGH);
-    wait_for_press(BTN_ENTER_PIN);
+    wait_for_high(BTN_ENTER_PIN);
     leds_blue(LOW);
 
     lcd_print_at(1, 0, "Are LEDs red?");
     leds_red(HIGH);
-    wait_for_press(BTN_ENTER_PIN);
+    wait_for_high(BTN_ENTER_PIN);
     leds_red(LOW);
 
     lcd_clear();
@@ -104,4 +83,28 @@ void run_diagnostics(void)
 
     delay(TEXT_DELAY);
     lcd_clear();
+}
+
+void wait_for_high(byte pin)
+{
+    while (digitalRead(pin) != HIGH)
+    {
+        delay(READ_DELAY);
+    }
+}
+
+void leds_red(byte state)
+{
+    digitalWrite(LED_RED_1, state);
+    digitalWrite(LED_RED_2, state);
+    digitalWrite(LED_RED_3, state);
+    digitalWrite(LED_RED_4, state);
+}
+
+void leds_blue(byte state)
+{
+    digitalWrite(LED_BLUE_1, state);
+    digitalWrite(LED_BLUE_2, state);
+    digitalWrite(LED_BLUE_3, state);
+    digitalWrite(LED_BLUE_4, state);
 }
