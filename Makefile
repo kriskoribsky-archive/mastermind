@@ -11,19 +11,23 @@
 build: 
 	platformio run
 
-test: # TODO add test config for unit testing
+test:
 	platformio test
 
 static:
-	platformio check --fail-on-defect medium --fail-on-defect high
+	platformio check --fail-on-defect low --fail-on-defect medium --fail-on-defect high
 
 debug:
 	platformio debug
 
-full: build static # TODO add test target
+full: build static
 
 upload: 
 	platformio run --target upload --upload-port /dev/ttyUSB0
 
 clean:
 	platformio run --target clean
+
+# SPEC
+# ================================================================================
+.PHONY: build test static debug full upload clean

@@ -5,15 +5,13 @@
 #include "lcd.h"
 #include "mastermind.h"
 
-// TODO implement unit tests
-
 int main(void)
 {
     arduino_init();
     circuit_init();
     lcd_init();
 
-    // run_diagnostics();
+    run_diagnostics();
 
     for (;;)
     {

@@ -1,6 +1,8 @@
 #ifndef _MASTERMIND_H
 #define _MASTERMIND_H
 
+#include <stdbool.h>
+
 // circuit configuration
 #define BTN_1_PIN       2
 #define BTN_2_PIN       3

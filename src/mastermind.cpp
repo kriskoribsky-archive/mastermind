@@ -187,12 +187,13 @@ void play_game(char *secret)
         else if (debounce_read(BTN_ENTER_PIN))
         {
             get_score(secret, history[current_guess], &peg_a, &peg_b);
-            current_history = current_guess++;
+            current_history = current_guess;
+            current_guess++;
         }
         else
         {
-            continue;
             delay(TICK_RATE);
+            continue;
         }
 
         // update
