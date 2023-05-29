@@ -18,6 +18,10 @@ int main(void)
     for (;;)
     {
         char *code = generate_code(false, SECRET_LENGTH);
+
+        Serial.println("Generated secret is:");
+        Serial.println(code);
+
         play_game(code);
         free(code);
     }

@@ -4,6 +4,7 @@
 
 #include "mastermind.h"
 #include "lcd.h"
+#include "debounce.h"
 
 void wait_for_high(byte pin);
 void leds_red(byte state);
@@ -29,7 +30,7 @@ void circuit_init(void)
     randomSeed(analogRead(1));
 
     Serial.begin(9600);
-    
+
     pinMode(LED_BLUE_1, OUTPUT);
     pinMode(LED_RED_1, OUTPUT);
     pinMode(LED_BLUE_2, OUTPUT);
@@ -93,9 +94,8 @@ void run_diagnostics(void)
 
 void wait_for_high(byte pin)
 {
-    while (digitalRead(pin) != HIGH)
+    while (debounce_read(pin) != HIGH)
         ;
-    delay(READ_DELAY);
 }
 
 void leds_red(byte state)
