@@ -12,7 +12,7 @@
 
 void render_intro(void);
 void render_game(char *secret, char **history, const int current_guess, const int current_history);
-void render_end(char *secret, const int current_guess);
+void render_end(char *secret, bool win);
 
 #define INCREMENT(c) (c) = '0' + ((c) - '0' + 1) % 10
 
@@ -45,19 +45,33 @@ char *generate_code(bool repeat, int length)
 
 void get_score(const char *secret, const char *current_guess, int *peg_a, int *peg_b)
 {
+    assert(secret != NULL);
+    assert(current_guess != NULL);
+
     size_t length = strlen(secret);
     assert(length == strlen(current_guess));
 
     *peg_a = *peg_b = 0;
 
+    char secret_buffer[length + 1];
+    strcpy(secret_buffer, secret);
+
     for (size_t i = 0; i < length; i++)
     {
-        if (secret[i] == current_guess[i])
+        if (current_guess[i] == secret_buffer[i])
         {
+            secret_buffer[i] = ' ';
             (*peg_a)++;
         }
-        else if (strchr(secret, current_guess[i]) != NULL)
+    }
+
+    for (size_t i = 0; i < length; i++)
+    {
+        char *secret_c = strchr(secret_buffer, current_guess[i]);
+
+        if (secret_c != NULL)
         {
+            *secret_c = ' ';
             (*peg_b)++;
         }
     }
@@ -203,7 +217,7 @@ void play_game(char *secret)
         delay(TICK_RATE);
     }
 
-    render_end(secret, current_guess);
+    render_end(secret, peg_a == SECRET_LENGTH);
 
     for (int i = 0; i < MAX_GUESSES; i++)
     {
@@ -235,14 +249,14 @@ void render_game(char *secret, char **history, const int current_guess, const in
     lcd_printf_at(1, 0, "Your guess: %s", history[current_guess]);
 }
 
-void render_end(char *secret, const int current_guess)
+void render_end(char *secret, bool win)
 {
     assert(SECRET_LENGTH <= UINT8_MAX);
 
     lcd_clear();
     turn_off_leds();
 
-    if (current_guess < MAX_GUESSES)
+    if (win)
     {
         lcd_print("You won!");
         lcd_printf_at(1, 0, "secret was: %s", secret);

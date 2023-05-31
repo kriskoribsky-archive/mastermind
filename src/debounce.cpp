@@ -4,7 +4,7 @@
 
 #include "debounce.h"
 
-#define DEBOUNCE_DELAY 100
+#define DEBOUNCE_DELAY 150
 
 uint8_t debounce_read(uint8_t pin)
 {
